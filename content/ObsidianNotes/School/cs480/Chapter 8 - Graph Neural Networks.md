@@ -18,14 +18,17 @@ We have described some examples of graphs in the wild, but what tasks do we want
 
 #### The challenges of using graphs in machine learning
 The main challenge, is representing graphs a tensors. In many situations, data structures like adjacency matrices work well. But, what about for representing arbitrary graphs? Often, this leads to very sparse adjacency matrices, which are space-inefficient. Consider the following representation for relationships between characters in Shakespeare's *Othello*:
+
 ![[Screenshot 2024-07-02 at 12.31.24 PM.png || 500]]
 
 These are just 2. The total number of possible versions is untenable, as if we only had 4 nodes, we would already have 24 possible graphs. An elegant way and memory-efficient method is to use adjacency lists. 
+
 ![[Screenshot 2024-07-02 at 12.32.47 PM.png | 500]]
 
 Now, let's take a look at building a GNN:
 #### Deeper into Graph NNs
 We will start with the simplest GNN architecture, one where we learn new embeddings for all graph attributes (nodes, edges, global), but where we do not yet use the connectivity of the graph. This GNN uses a separate multilayer perceptron (MLP) (or your favorite differentiable model) on each component of a graph; we call this a GNN layer. For each node vector, we apply the MLP and get back a learned node-vector. We do the same for each edge, learning a per-edge embedding, and also for the global-context vector, learning a single embedding for the entire graph.
+
 ![[Screenshot 2024-07-02 at 12.37.46 PM.png || 500]]
 
 As is common with neural networks modules or layers, we can stack these GNN layers together.
@@ -37,6 +40,7 @@ However, it is not always so simple. For instance, you might have information in
 1. Gather each of their embeddings and concatenate them into a matrix 
 2. The gathered embeddings are then aggregated, usually via a sum operation (think taking element-wise sum of the embeddings of node vector and all the adjacent edge vectors)
 The following is a good diagram of this:
+
 ![[Screenshot 2024-07-02 at 2.20.05 PM.png || 500]]
 
 So, if we only have edge-level features, and want to predict binary node information, we can use pooling to pass information to where it needs to go. The same applies if we only have node-level features, and are trying to predict binary edge-level information. Then, once we have these new embeddings, we just pass it through some classifier like a logistic regression or a multilayer-perceptron. 
@@ -51,6 +55,7 @@ We could make more sophisticated predictions by using pooling within the GNN lay
 - All pooled messages are passed through an update function -> learned via NN
 
 Just as pooling can be applied to either nodes or edges, message passing can occur between either nodes or edges.
+
 ![[Screenshot 2024-07-02 at 2.47.40 PM.png]]
 This is the simplest example of message-passing in a GNN layer. What's interesting, is this is reminiscent of a standard convolution operation:
 - Both are operations to aggregate and process the information of an element's neighbours in order to update the elements value. 
@@ -65,12 +70,14 @@ Our dataset does not always contain all types of information (node, edge, and gl
 We can incorporate the information from neighbouring edges in the same way we used neighbouring node information earlier, by first pooling the edge information, transforming it with an update function, and storing it. However, the node and edge information stored in a graph are not necessarily the same size or shape, so it is not immediately clear how to combine them. One way is to learn a **linear mapping from the space of edges to the space of nodes, and vice versa**. A.K.A -> Introduce some weight matrix to learn this mapping. 
 
 Which graph attributes we update and in which order we update them is one design decision when constructing GNNs. We could choose whether to update node embeddings before edge embeddings, or the other way around. This is an open area of research with a variety of solutions.
+
 ![[Screenshot 2024-07-02 at 3.55.32 PM.png || 500]]
 ##### Learning global representations
 There is one flaw with the networks we have described so far: nodes that are far away from each other in the graph may never be able to efficiently transfer information to one another, even if we apply message passing several times. For one node, If we have k-layers, information will propagate at most k-steps away.
 - One solution would be to have all nodes be able to pass information to each other. Unfortunately for large graphs, this quickly becomes computationally expensive (although this approach, called ‘virtual edges’, has been used for small graphs such as molecules).
 
-One solution to this problem is by using the global representation of a graph (U) which is sometimes called a **master node**. In this view all graph attributes have learned representations, so we can leverage them during pooling by conditioning the information of our attribute of interest with respect to the rest. For example, for one node we can consider information from neighboring nodes, connected edges and the global information. To condition the new node embedding on all these possible sources of information, we can simply concatenate them. Additionally we may also map them to the same space via a linear map and add them or apply a feature-wise modulation layer, which can be considered a type of featurize-wise attention mechanism.
+One solution to this problem is by using the global representation of a graph (U) which is sometimes called a **master node**. In this view all graph attributes have learned representations, so we can leverage them during pooling by conditioning the information of our attribute of interest with respect to the rest. For example, for one node we can consider information from neighbouring nodes, connected edges and the global information. To condition the new node embedding on all these possible sources of information, we can simply concatenate them. Additionally we may also map them to the same space via a linear map and add them or apply a feature-wise modulation layer, which can be considered a type of featurize-wise attention mechanism.
+
 ![[Screenshot 2024-07-02 at 3.57.13 PM.png || 500]]
 
 Please read the following (if have time, prob not, but some interesting things):
