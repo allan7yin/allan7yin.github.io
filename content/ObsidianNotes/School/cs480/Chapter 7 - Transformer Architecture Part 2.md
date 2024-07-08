@@ -1,5 +1,7 @@
 > edit: This note was made before the other transformer one. This is more visual explanation. It's important to first read that one before this, as RNN's are important
 
+![[Screenshot 2024-07-07 at 10.34.54 PM.png || 500]]
+
 This chapter goes over the transformer architecture, and in particular, how it addresses the downfalls of residual networks and how transformers work. A Transformer is a special kind of neural network and it is the core invention underlying the current boom in AI. 
 ### Word Embeddings
 For now, let's try and understand transformer models through the lens of LLM's, such as GPT3. Let's consider a text processing example, where the inputs to the model are text snippets. The first step in these models is to break up the input into little chunks, and then make those chunks into little vectors. Each of these chunks is called a token, which you may recall when you are charged per token when using OpenAI API calls. 
@@ -129,5 +131,15 @@ Let's make notes on this:
 ### Vision Transformers
 Briefly mentioned in class. This link is useful: https://www.youtube.com/watch?v=j3VNqtJUoz0&ab_channel=DeepFindr
 - Will likely want to use this when building model for final project
+- This is an example of an **encoder-only** 
+
+Let's give an example of this:
+- First step is to break the image into square patches, as recall earlier, we can treat these patches as sequential tokens, which transformers work well. These patches are flattened into a sequence of patches. Then, we apply a linear projection of the flattened patches, this is the same as when processing text data, we mapped the tokens of the input to their corresponding embeddings
+- In these embeddings, we also want to encode the position into the embeddings, as the position in the sequence matters
+- We then pass these embeddings into a transformer encoder
+- Last, we pluck out the embeddings and pass it through an MLP (Dense NN), and then we use some classifier to predict the class of the image
+
+![[Screenshot 2024-07-07 at 10.51.57 PM.png || 500]]
+
 #### Interesting Links
 https://www.youtube.com/watch?v=kCc8FmEb1nY&t=0s&ab_channel=AndrejKarpathy
